@@ -22,4 +22,14 @@ class UserReadRepository implements UserReadRepositoryInterface
     {
         return $this->query()->where('email', $email)->first();
     }
+
+    public function getCleanUpRecordsCount(string $weekAgo): int
+    {
+        return $this->query()
+            ->where('created_at', '<', $weekAgo)
+            ->whereNotExists(function ($query) {
+                $query->from('user_teams')
+                    ->whereRaw('users.id = user_teams.user_id');
+            })->count();
+    }
 }

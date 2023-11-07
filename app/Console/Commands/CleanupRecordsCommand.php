@@ -2,37 +2,23 @@
 
 namespace App\Console\Commands;
 
+use App\Repositories\Read\User\UserReadRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class CleanupRecordsCommand extends Command
 {
     protected $signature = 'cleanup-records:run';
     protected $description = 'Cleanup records';
 
-    public function __construct()
-    {
-        parent::__construct();
-
-//        event(new ModelCreatedOrUpdated($model, auth()->user()));
-    }
-
-    public function handle(): void
-    {
-
-        event(new UserCreating($user));
-
+    public function handle(
+        UserReadRepositoryInterface $userReadRepository
+    ): void {
         $start = Carbon::now();
         $this->info("Cleanup started at: " . $start);
 
         $weekAgo = Carbon::now()->subWeek();
-        $count = DB::table('users')
-            ->where('created_at', '<', $weekAgo)
-            ->whereNotExists(function ($query) {
-                $query->from('user_teams')
-                    ->whereRaw('users.id = user_teams.user_id');
-            })->count();
+        $count = $userReadRepository->getCleanUpRecordsCount($weekAgo);
 
         $end = Carbon::now();
         $this->info("Count: " . $count);

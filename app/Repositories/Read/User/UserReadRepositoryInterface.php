@@ -10,4 +10,6 @@ interface UserReadRepositoryInterface
     public function index(): Collection;
 
     public function getByEmail(string $email): ?User;
+
+    public function getCleanUpRecordsCount(string $weekAgo): int;
 }
